@@ -11,11 +11,14 @@ package com.sms.hotelreservationsystem;
 import java.util.ArrayList;
 public class Hotel {
     private ArrayList<Room> rooms;
+    private ArrayList<Guest> guests;
     
     public Hotel(){
         rooms = new ArrayList<>();
+        guests = new ArrayList<>();
     
     }
+   
     public void addRoom(Room room){
         Room existingRoom = findRoomByNumber(room.getRoomNumber());
         if(existingRoom != null){
@@ -98,6 +101,19 @@ public class Hotel {
         }
         room.setPricePerNight(newPrice);
     
+    
     }
+    public void addGuest(Guest guest){
+        for(Guest g: guests){
+            if(g.getGuestId() == guest.getGuestId()){
+                return;
+                
+            
+            }
+        
+        }
+    
+    }
+    
     
 }

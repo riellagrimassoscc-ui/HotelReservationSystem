@@ -1,13 +1,19 @@
- 
-# Maven build output
+# Maven build directory
 target/
 
-# NetBeans private settings (if any)
-nbproject/private/
+# SQLite Database local files
+*.db
+*.db-journal
+*.db-wal
 
-# Compiled class files
-*.class
+# IDE-specific files (VS Code / Eclipse / NetBeans / IntelliJ)
+.vscode/
+.idea/
+*.iml
+.classpath
+.project
+.settings/
 
-# OS files
-.DS_Store
+# OS specific files
 Thumbs.db
+.DS_Store

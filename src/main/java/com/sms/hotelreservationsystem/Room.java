@@ -21,6 +21,34 @@ public class Room {
         this.pricePerNight = pricePerNight;
         this.status = RoomStatus.AVAILABLE;
     }
+
+    /**
+     * Database Insert Method
+     * @param roomNumber
+     * @param roomType
+     * @param pricePerNight
+     * @return true if the room was added successfully, false otherwise
+     * @throws SQLException
+     */
+    public static boolean add(String roomNumber, String roomType, double pricePerNight) {
+        String query = "INSERT INTO rooms (room_number, room_type, price_per_night) VALUES (?, ?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+
+            // Bind Parameters
+            pstmt.setString(1, roomNumber);
+            pstmt.setString(2, roomType);
+            pstmt.setDouble(3, pricePerNight);
+
+            int rowsInserted = pstmt.executeUpdate();
+            return rowsInserted > 0;
+
+        } catch (SQLException e) {
+            System.err.println("Error adding room: " + e.getMessage());
+            return false;
+        }
+    }
     
     //Getters
     public int getRoomNumber(){

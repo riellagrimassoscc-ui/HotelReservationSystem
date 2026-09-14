@@ -14,6 +14,7 @@ public class Room {
     private double pricePerNight;
     private RoomStatus status;
     
+    
     //Constructor header
     public Room(int roomNumber, String roomType, double pricePerNight){
         this.roomNumber = roomNumber;

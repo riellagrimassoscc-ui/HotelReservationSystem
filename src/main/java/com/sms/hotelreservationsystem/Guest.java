@@ -76,7 +76,7 @@ public class Guest{
     public String toString(){
         return "Guest ID: " + guestId + "\n" + 
                 "Guest's Name: " + name + "\n" + 
-                "Phone number: " + phone + 
+                "Phone number: " + phone + "\n" +
                 "Email: " + email ;
     }
 

@@ -19,7 +19,7 @@ public class HotelReservationSystem {
         Hotel hotel = new Hotel();
         
         Guest guest1 = new Guest (1, "Riel So", " 0912321321", "@gmail.com");
-        Guest guest2 = new Guest (2, "Ayeza Barro", "09123123", "ayeza@gmail.com");
+        Guest guest2 = new Guest (2, "Yel", "09123123", "yel@gmail.com");
         Guest guest3 = new Guest (1, "Aggin", "0912311111", "@yahoo.com");
         hotel.addGuest(guest1);
         System.out.println();
@@ -31,7 +31,7 @@ public class HotelReservationSystem {
         
         Guest foundGuest = hotel.findGuestById(2);
         System.out.println(foundGuest);
-        Guest foundGuestEmail = hotel.findGuestByEmail("ayeza@gmail.com");
+        Guest foundGuestEmail = hotel.findGuestByEmail("yel@gmail.com");
         System.out.println(foundGuestEmail);
         Guest notFoundGuestEmail = hotel.findGuestByEmail("nonexistent@gmail.com");
         System.out.println(notFoundGuestEmail);

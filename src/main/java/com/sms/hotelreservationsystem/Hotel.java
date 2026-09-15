@@ -223,4 +223,32 @@ public class Hotel {
        reservation.getRoom().setStatus(RoomStatus.AVAILABLE);
        reservation.setStatus(ReservationStatus.CANCELLED);
    }
+   public void checkInGuest(int reservationId){
+       Reservation reservation = findReservationById(reservationId);
+       if(reservation == null){
+           System.out.println("Reservation ID not found!");
+           return;
+       }
+       if(reservation.getStatus() == ReservationStatus.CONFIRMED){
+           reservation.getRoom().setStatus(RoomStatus.OCCUPIED);
+           reservation.setStatus(ReservationStatus.CHECKED_IN);
+       }else{
+           System.out.println("Cannot check in. Reservation status is: " + reservation.getStatus());
+       
+       }
+    }
+   public void checkOutGuest(int reservationId){
+       Reservation reservation = findReservationById(reservationId);
+       if(reservation == null){
+           System.out.println("Reservation ID not found!");
+           return;
+       }
+       if(reservation.getStatus() == ReservationStatus.CHECKED_IN){
+           reservation.getRoom().setStatus(RoomStatus.AVAILABLE);
+           reservation.setStatus(ReservationStatus.CHECKED_OUT);
+       
+       }else{
+           System.out.println("Cannot check out. Reservation status is: " + reservation.getStatus());
+       }
+   }
 }

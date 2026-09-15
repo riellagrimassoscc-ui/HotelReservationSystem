@@ -9,13 +9,17 @@ package com.sms.hotelreservationsystem;
  * @author Riel
  */
 import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 public class Hotel {
     private ArrayList<Room> rooms;
     private ArrayList<Guest> guests;
+    private ArrayList<Reservation> reservations;
     
     public Hotel(){
         rooms = new ArrayList<>();
         guests = new ArrayList<>();
+        reservations = new ArrayList<>();
     
     }
    
@@ -153,4 +157,70 @@ public class Hotel {
         }
     guest.setEmail(newEmail);
     }
+    
+    
+    public boolean checkRoomAvailability(int roomNumber){
+        Room room = findRoomByNumber(roomNumber);
+        if(room == null){
+            return false;
+        }
+        return room.isAvailable();
+    }
+    
+   public void createReservation(int reservationId,
+           int guestId,
+           int roomNumber,
+           LocalDate checkIn,
+           LocalDate checkOut){
+       Guest guest = findGuestById(guestId);
+       if(guest == null){
+           System.out.println("Guest not found");
+           return;
+       
+       }
+       Room room = findRoomByNumber(roomNumber);
+       if(room == null){
+           System.out.println("Room not found");
+           return;
+       }
+       if(!room.isAvailable()){
+           System.out.println("Room is not avaiable");
+           return;
+       
+       }
+       long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
+       double totalPrice = nights * room.getPricePerNight();
+       
+       Reservation newReservation = new Reservation(reservationId,
+               guest, room, 
+               checkIn, checkOut, 
+               totalPrice);
+       
+       reservations.add(newReservation);
+       room.setStatus(RoomStatus.RESERVED);
+   
+   }
+   public void viewAllReservations(){
+       for(Reservation r: reservations){
+           System.out.println(r);
+       }
+   }
+   public Reservation findReservationById(int reservationId){
+        for(Reservation r: reservations){
+            if(r.getReservationId() == reservationId){
+                return r;
+            }    
+        }
+        return null;
+    }
+   public void cancelReservation(int reservationId){
+       Reservation reservation = findReservationById(reservationId);
+       if(reservation == null){
+           System.out.println("Reservation ID not found!");
+           return;
+       
+       }
+       reservation.getRoom().setStatus(RoomStatus.AVAILABLE);
+       reservation.setStatus(ReservationStatus.CANCELLED);
+   }
 }

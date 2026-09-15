@@ -95,18 +95,18 @@ public class Reservation {
         return ChronoUnit.DAYS.between(checkIn, checkOut);
     }
 
+    
+    
+    
     @Override
-    public String toString(){
-        return "Reservation ID: " + guest.getGuestId() + "\n" +
-                "Guest: " + guest.getName() + "\n" +
-                "Room: " + room.getRoomNumber() + "\n" + 
-                " (" + room.getRoomType() + ") " 
-                + "\n" +
-                "Check-in: " + checkIn + "\n" +
-                "Check-out: " + checkOut + "\n" +
-                "Total Price: " + totalPrice + "\n" +
-                "Status: " + status + "\n";
-    }
-
+    public String toString(){    
+        return "Reservation ID: " + reservationId + "\n" +
+            "Guest: " + guest.getName() + "\n" +
+            "Room: " + room.getRoomNumber() + " (" + room.getRoomType() + ")" + "\n" +
+            "Check-in: " + checkIn + "\n" +
+            "Check-out: " + checkOut + "\n" +
+            "Total Price: " + totalPrice + "\n" +
+            "Status: " + status + "\n";
+        }
 }
 

@@ -13,34 +13,18 @@ package com.sms.hotelreservationsystem;
  */
 
 import java.util.*;
+import java.time.LocalDate;
+import java.time.Month;
 public class HotelReservationSystem {
 
     public static void main(String[] args) {
-        Hotel hotel = new Hotel();
+        Guest guest1 = new Guest(1,"Riel So", "091232131123","rielso@gmail.com");
+        Room room1 = new Room(205,"DELUXE",2500);
         
-        Guest guest1 = new Guest (1, "Riel So", " 0912321321", "@gmail.com");
-        Guest guest2 = new Guest (2, "Yel", "09123123", "yel@gmail.com");
-        Guest guest3 = new Guest (1, "Aggin", "0912311111", "@yahoo.com");
-        hotel.addGuest(guest1);
-        System.out.println();
-        hotel.addGuest(guest2);
-        System.out.println();
-        hotel.addGuest(guest3);
-        System.out.println();
+        LocalDate checkIn = LocalDate.of(2026, 9, 27);
+        LocalDate checkOut = LocalDate.of(2026, 9, 30);
+        Reservation res1 = new Reservation(1, guest1, room1, checkIn, checkOut, 7500);
         
-        
-        Guest foundGuest = hotel.findGuestById(2);
-        System.out.println(foundGuest);
-        Guest foundGuestEmail = hotel.findGuestByEmail("yel@gmail.com");
-        System.out.println(foundGuestEmail);
-        Guest notFoundGuestEmail = hotel.findGuestByEmail("nonexistent@gmail.com");
-        System.out.println(notFoundGuestEmail);
-        Guest notFoundGuest = hotel.findGuestById(10);
-        System.out.println(notFoundGuest);
-        
-        hotel.updateGuestName(1, "Setsuna F. Seie");
-        hotel.updateGuestPhone(1, "098765321");
-        hotel.updateGuestEmail(1,"niceone@gmail.com");
-        hotel.viewAllGuests();
+        System.out.println(res1);
     }
 }

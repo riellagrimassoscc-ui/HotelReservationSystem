@@ -45,14 +45,14 @@ public class HotelReservationSystem {
         
         do{
             
-            System.out.println("\n===== HOTEL RESERVATION SYSTEM =====");
-            System.out.println("1. Room Management");
-            System.out.println("2. Guest Management");
-            System.out.println("3. Reservation Management");
-            System.out.println("4. Check-in / Check-out");
-            System.out.println("5. Exit");
-            System.out.print("Enter choice(1-5 only): ");
-            
+            System.out.println("\n===== HOTEL RESERVATION =====");
+            System.out.println("1. View Available Rooms");
+            System.out.println("2. Search Room By Number");
+            System.out.println("3. Search Rooms By Type");
+            System.out.println("4. Make Reservation");
+            System.out.println("5. Reservation Management");
+            System.out.println("6. Check-in / Check-out ");
+            System.out.println("7. Exit ");
             int choice = 0;
             if(scanner.hasNextInt()){
                choice = scanner.nextInt();
@@ -63,146 +63,35 @@ public class HotelReservationSystem {
             
             switch(choice){
                 case 1:
-                    roomManagementMenu();
-                    break;
-                case 2:
-                    guestManagementMenu();
-                    break;
-                case 3:
-                    reservationManagementMenu();
-                    break;
-                case 4:
-                    checkInOutMenu();
-                    break;
-                case 5:
-                    running = false;
-                    System.out.println("Thank you for using the reservation");
-                    break;
-                default:
-                    System.out.println("Invalid input! Choose 1-5 only!");
-            }
-        }while(running);
-    }
-    
-    public static void roomManagementMenu(){
-        boolean back = false;
-        
-        do{
-            System.out.println("\n--- Room Management ---");
-            System.out.println("1. Add Room");
-            System.out.println("2. View All Rooms");
-            System.out.println("3. View Available Rooms");
-            System.out.println("4. Search Room by Number");
-            System.out.println("5. Search Rooms by Type");
-            System.out.println("6. Update Room Price");
-            System.out.println("7. Remove Room");
-            System.out.println("8. Back to Main Menu");
-            System.out.print("Enter choice(1-8): ");
-            int choice = 0;
-            if(scanner.hasNextInt()){
-                choice = scanner.nextInt();
-            }else{
-                System.out.println("Invalid input! Try number only");
-            }
-            switch(choice){
-                case 1:
-                    addRoom();
-                    break;
-                case 2:
-                    hotel.viewAllRooms();
-                    break;
-                case 3:
                     hotel.viewAvailableRooms();
                     break;
-                case 4:
+                case 2:
                     searchRoomByNumber();
                     break;
-                case 5:
+                case 3:
                     searchRoomsByType();
                     break;
+                case 4:
+                    createReservationMenu();
+                    break;
+                case 5:
+                    reservationManagementMenu();
+                    break;
                 case 6:
-                    updateRoomPriceMenu();
+                    checkInOutMenu();
                     break;
                 case 7:
-                    removeRoomMenu();
-                    break;
-                case 8:
-                    back = true;
+                    running = false;
+                    System.out.println("Thank you for using the reservation system");
                     break;
                 default:
-                    System.out.println("Invalid input! Choose 1-8 only");
+                    System.out.println("Invalid input! Choose 1-7 only!");
             }
-        }while(!back);
-    }
-    
-    public static void addRoom(){
-        int roomNumber = 0;
-        System.out.print("Enter room number: ");
-        if(scanner.hasNextInt()){
-            roomNumber = scanner.nextInt();
-        }else{
-            System.out.println("Invalid input. Enter a number only!");
-            scanner.next();
-        }
-        
-        
-        int choice = 0;
-        String roomType = "";
-        double price = 0;
-        boolean validType = false;
-        
-        do{
-        System.out.println("Select room type:");
-        System.out.println("1. SINGLE - PHP1500/NIGHT");
-        System.out.println("2. DELUXE - PHP2500/NIGHT");
-        System.out.println("3. PREMIUM - PHP3500/NIGHT");
-        System.out.println("4. SUITE - PHP4500/NIGHT");
-        System.out.print("Enter choice(1-4): ");
-        
-        
-        if(scanner.hasNextInt()){
-            choice = scanner.nextInt();
-        }else{
-            System.out.println("Invalid input. Enter a number only!");
-        }
-        
-        
-        
-        switch(choice){
-            case 1:
-                roomType = "SINGLE";
-                price = 1500;
-                validType = true;
-                break;
-            case 2:
-                roomType = "DELUXE";
-                price = 2500;
-                validType = true;
-                break;
-            case 3:
-                roomType = "PREMIUM";
-                price = 3500;
-                validType = true;
-                break;
-            case 4:
-                roomType = "SUITE";
-                price = 4500;
-                validType = true;
-                break;
-            default:
-                System.out.println("Invalid input. Choose 1-4 only!");
-        }
-        
-       
-        }while(!validType);
-        Room room = new Room(roomNumber, roomType, price);
-        hotel.addRoom(room);
-        
+        }while(running);
     }
     public static void createReservationMenu(){
        int choice = 0;
        String roomType = "";
-       double price = 0;
        boolean validType = false;
        
        do{
@@ -217,6 +106,7 @@ public class HotelReservationSystem {
         choice = scanner.nextInt();
     }else{
         System.out.println("Invalid input. Enter a number only!");
+        scanner.next();
     }
     
     switch(choice){
@@ -303,8 +193,13 @@ public class HotelReservationSystem {
         do{
              System.out.println("Choose Room Type");
              System.out.println("1. SINGLE\n2. DELUXE\n3. PREMIUM\n4. SUITE");
-             System.out.println("Enter choice: ");
-             choice = scanner.nextInt();
+             System.out.println("Enter choice(1-4 only): ");
+             if(scanner.hasNextInt()){
+                 choice = scanner.nextInt();
+             }else{
+                 System.out.println("Enter a number only!");
+                 scanner.next();
+             }
              
              switch(choice){
                 case 1: 
@@ -339,24 +234,6 @@ public class HotelReservationSystem {
         }
         
     }
-    public static void updateRoomPriceMenu(){
-        int roomNumber = 0;
-        System.out.print("Enter room number: ");
-        if(scanner.hasNextInt()){
-            roomNumber = scanner.nextInt();
-            Room room = hotel.findRoomByNumber(roomNumber);
-            if(room == null){
-                System.out.println("Room not found!");
-            }else{
-                System.out.println(room);
-            }
-        }else{
-            System.out.println("Enter a number only");
-            scanner.next();
-        }
-    }
-public static void removeRoomMenu(){}
-public static void guestManagementMenu(){}
 public static void reservationManagementMenu(){}
 public static void checkInOutMenu(){}
 }

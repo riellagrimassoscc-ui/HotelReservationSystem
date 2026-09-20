@@ -11,3 +11,7 @@ nbproject/private/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Derby database files (generated at runtime)
+HotelDB/
+derby.log

@@ -11,7 +11,6 @@ package com.sms.hotelreservationsystem;
 public enum ReservationStatus {
     CONFIRMED,
     CHECKED_IN,
-    CHECKED_OUT,
-    CANCELLED
+    CHECKED_OUT
 }
 

@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sun Sep 20 16:43:33 GMT+08:00 2026:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.17.1.0 - (1913217): instance a816c00e-01a0-bdfc-24d7-00000075b738 
+on database directory C:\Users\Riel\OneDrive\Documents\NetBeansProjects\HotelReservationSystem\HotelDB with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@50b4d649 
+Loaded from file:/C:/Users/Riel/.m2/repository/org/apache/derby/derby/10.17.1.0/derby-10.17.1.0.jar
+java.vendor=Eclipse Adoptium
+java.runtime.version=26.0.2+10
+user.dir=C:\Users\Riel\OneDrive\Documents\NetBeansProjects\HotelReservationSystem
+os.name=Windows 11
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

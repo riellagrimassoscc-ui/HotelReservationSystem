@@ -50,7 +50,7 @@ public class Room {
         if(pricePerNight > 0){
             this.pricePerNight = pricePerNight;
         }else{
-            System.out.println("Price cannot be negative");
+            System.out.println("Price must be greater than zero");
         }
     }
     

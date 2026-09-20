@@ -10,4 +10,11 @@
         <maven.compiler.release>26</maven.compiler.release>
         <exec.mainClass>com.sms.hotelreservationsystem.HotelReservationSystem</exec.mainClass>
     </properties>
+    <dependencies>
+    <dependency>
+        <groupId>org.apache.derby</groupId>
+        <artifactId>derby</artifactId>
+        <version>10.17.1.0</version>
+    </dependency>
+</dependencies>
 </project>

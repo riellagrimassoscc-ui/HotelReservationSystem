@@ -14,26 +14,12 @@ import java.time.temporal.ChronoUnit;
 
 public class HotelReservationSystem {
 
-    static Hotel hotel = new Hotel();
     static Scanner scanner = new Scanner(System.in);
-    static int nextReservationId = 1;
     static int nextGuestId = 1;
 
     public static void main(String[] args) {
-        for (int i = 101; i <= 110; i++) {
-            hotel.addRoom(new Room(i, "SINGLE", 1500));
 
-        }
-        for (int i = 201; i <= 210; i++) {
-            hotel.addRoom(new Room(i, "DELUXE", 2500));
-
-        }
-        for (int i = 301; i <= 310; i++) {
-            hotel.addRoom(new Room(i, "PREMIUM", 3500));
-        }
-        for (int i = 401; i <= 410; i++) {
-            hotel.addRoom(new Room(i, "SUITE", 4500));
-        }
+     
 
         boolean running = true;
 
@@ -42,7 +28,7 @@ public class HotelReservationSystem {
 
             switch (choice) {
                 case 1:
-                    hotel.viewAvailableRooms();
+                    viewAvailableRoomsFromDatabase();
                     break;
 
                 case 2:
@@ -156,7 +142,7 @@ public class HotelReservationSystem {
 
         scanner.nextLine();
 
-        ArrayList<Room> matches = hotel.findRoomsByType(roomType);
+        ArrayList<Room> matches = RoomDAO.findRoomsByType(roomType);
 
         Room assignedRoom = null;
 
@@ -172,12 +158,12 @@ public class HotelReservationSystem {
             return;
         }
 
-        int reservationId = nextReservationId;
+        int reservationId = ReservationDAO.getNextReservationId();
 
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
-        Guest guest = hotel.findGuestByEmail(email);
+        Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("No email found. Lets create one!");
@@ -191,7 +177,7 @@ public class HotelReservationSystem {
             String phone = scanner.nextLine();
 
             guest = new Guest(guestId, name, phone, email);
-            hotel.addGuest(guest);
+            GuestDAO.saveGuest(guest);
 
             nextGuestId++;
         }
@@ -256,21 +242,28 @@ public class HotelReservationSystem {
                 } else if (payment >= totalPrice) {
                     double change = payment - totalPrice;
 
-                    hotel.createReservation(
+                    boolean saved = ReservationDAO.saveReservation(
                             reservationId,
                             guest.getGuestId(),
                             assignedRoom.getRoomNumber(),
-                            checkIn,
-                            checkOut
+                            totalPrice, payment, checkIn, checkOut, "CONFIRMED"
                     );
+                    if (saved) {
+                        RoomDAO.updateRoomStatus(
+                                assignedRoom.getRoomNumber(),
+                                "RESERVED"
+                        );
 
-                    Reservation reservation = hotel.findReservationById(reservationId);
+                        Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
-                    reservationReceipt(reservation, payment, change);
+                        reservationReceipt(reservation, payment, change);
 
-                    nextReservationId++;
+                        validPayment = true;
+                    } else {
+                        System.out.println("Reservation was not saved. Please try again!");
+                        return;
 
-                    validPayment = true;
+                    }
 
                 } else {
                     System.out.println("Insufficient payment. Please enter enough payment");
@@ -289,7 +282,7 @@ public class HotelReservationSystem {
         System.out.print("Enter room number: ");
         if (scanner.hasNextInt()) {
             roomNumber = scanner.nextInt();
-            Room room = hotel.findRoomByNumber(roomNumber);
+            Room room = RoomDAO.findRoomByNumber(roomNumber);
             if (room == null) {
                 System.out.println("Room not found!");
             } else {
@@ -338,7 +331,7 @@ public class HotelReservationSystem {
                     System.out.println("Invalid input. Choose 1-4 only!");
             }
         } while (!validType);
-        ArrayList<Room> matches = hotel.findRoomsByType(roomType);
+        ArrayList<Room> matches = RoomDAO.findRoomsByType(roomType);
         if (matches.isEmpty()) {
             System.out.println("No rooms found");
         } else {
@@ -393,23 +386,24 @@ public class HotelReservationSystem {
     }
 
     public static void viewMyReservations() {
-        String email = "";
-        System.out.println("Enter your email: ");
-        email = scanner.nextLine();
-        Guest guest = hotel.findGuestByEmail(email);
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
+
+        Guest guest = GuestDAO.findGuestByEmail(email);
         if (guest == null) {
             System.out.println("Guest not found");
-        } else {
-            ArrayList<Reservation> matches = hotel.findReservationsByGuest(guest);
-            if (matches.isEmpty()) {
-                System.out.println("No reservations found");
-            } else {
-                for (Reservation r : matches) {
-                    System.out.println(r);
+            return;
 
-                }
+        }
+        ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
+        if (matches.isEmpty()) {
+            System.out.println("No reservations found");
+            return;
 
-            }
+        }
+        for (Reservation r : matches) {
+            System.out.println(r);
+
         }
 
     }
@@ -420,14 +414,14 @@ public class HotelReservationSystem {
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
-        Guest guest = hotel.findGuestByEmail(email);
+        Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("Guest not found");
             return;
         }
 
-        ArrayList<Reservation> matches = hotel.findReservationsByGuest(guest);
+        ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
 
         if (matches.isEmpty()) {
             System.out.println("No reservations found");
@@ -449,7 +443,7 @@ public class HotelReservationSystem {
         reservationId = scanner.nextInt();
         scanner.nextLine();
 
-        Reservation reservation = hotel.findReservationById(reservationId);
+        Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
         if (reservation == null) {
             System.out.println("Reservation ID does not exist");
@@ -515,17 +509,27 @@ public class HotelReservationSystem {
                 if (payment >= paymentDifference) {
                     double change = payment - paymentDifference;
 
-                    System.out.println("Additional payment accepted");
-                    System.out.println("Change: PHP " + change);
+                    double newPayment = reservation.getPayment() + paymentDifference;
 
-                    reservation.updateDates(newCheckIn, newCheckOut);
-                    reservation.updateTotalPrice();
-                    reservation.setPayment(
-                            reservation.getPayment() + paymentDifference
-                    );
+                    boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
+                            newCheckIn, newCheckOut,
+                            newTotalPrice, newPayment);
+                    
+                    if (updated) {
 
-                    System.out.println("Reservation updated successfully!");
-                    System.out.println(reservation);
+                        System.out.println("Additional payment accepted");
+                        System.out.println("Change: PHP " + change);
+
+                        reservation.updateDates(newCheckIn, newCheckOut);
+                        reservation.updateTotalPrice();
+                        reservation.setPayment(newPayment);
+
+                        System.out.println("Reservation updated successfully!");
+                        System.out.println(reservation);
+                    } else {
+                        System.out.println("Failed to update reservation in database");
+
+                    }
 
                 } else {
                     System.out.println("Insufficient additional payment");
@@ -539,26 +543,51 @@ public class HotelReservationSystem {
         } else if (paymentDifference == 0) {
 
             System.out.println("No additional payment required");
+            boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
+                    newCheckIn, 
+                    newCheckOut,
+                    newTotalPrice, 
+                    reservation.getPayment());
+            if(updated){
 
             reservation.updateDates(newCheckIn, newCheckOut);
             reservation.updateTotalPrice();
 
             System.out.println("Reservation updated successfully!");
             System.out.println(reservation);
+            }else{
+                System.out.println("Failed to update reservation in database");
+            
+            
+            }
 
         } else {
 
             double refund = reservation.getPayment() - newTotalPrice;
+            double newPayment = newTotalPrice;
 
             System.out.println("Reservation total decreased.");
             System.out.println("Refund amount: PHP " + refund);
+            
+             boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
+                    newCheckIn, 
+                    newCheckOut,
+                    newTotalPrice, 
+                    newPayment);
+            if(updated){
 
             reservation.updateDates(newCheckIn, newCheckOut);
             reservation.updateTotalPrice();
-            reservation.setPayment(newTotalPrice);
+            reservation.setPayment(newPayment);
 
             System.out.println("Reservation updated successfully!");
             System.out.println(reservation);
+            
+            }else{
+                System.out.println("Failed to update reservation in database");
+            
+            
+            }
         }
     }
 
@@ -568,12 +597,12 @@ public class HotelReservationSystem {
         System.out.println("Enter your email: ");
         String email = scanner.nextLine();
 
-        Guest guest = hotel.findGuestByEmail(email);
+        Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("Guest not found");
         } else {
-            ArrayList<Reservation> matches = hotel.findReservationsByGuest(guest);
+            ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
 
             if (matches.isEmpty()) {
                 System.out.println("No reservation found");
@@ -588,15 +617,22 @@ public class HotelReservationSystem {
                     reservationId = scanner.nextInt();
                     scanner.nextLine();
 
-                    Reservation reservation = hotel.findReservationById(reservationId);
+                    Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
                     if (reservation == null) {
                         System.out.println("Reservation ID does not exist");
                     } else {
                         if (reservation.getGuest().getGuestId() == guest.getGuestId()) {
 
-                            hotel.cancelReservation(reservationId);
-                            System.out.println("Reservation cancelled successfully");
+                           boolean cancelled = ReservationDAO.cancelReservation(reservationId);
+                           if(cancelled){
+                               RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "AVAILABLE");
+                               System.out.println("Reservation cancelled succesfully!");
+                           
+                           }else{
+                               System.out.println("Failed to cancel reservation");
+                           
+                           }
 
                         } else {
                             System.out.println("This reservation does not belong to you");
@@ -617,14 +653,14 @@ public class HotelReservationSystem {
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
-        Guest guest = hotel.findGuestByEmail(email);
+        Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("Guest not found");
             return;
         }
 
-        ArrayList<Reservation> matches = hotel.findReservationsByGuest(guest);
+        ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
 
         if (matches.isEmpty()) {
             System.out.println("No reservations found");
@@ -646,7 +682,7 @@ public class HotelReservationSystem {
         int reservationId = scanner.nextInt();
         scanner.nextLine();
 
-        Reservation reservation = hotel.findReservationById(reservationId);
+        Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
         if (reservation == null) {
             System.out.println("Reservation ID does not exist");
@@ -658,7 +694,15 @@ public class HotelReservationSystem {
             return;
         }
 
-        hotel.checkInGuest(reservationId);
+        boolean updated = ReservationDAO.updateReservationStatus(reservationId, "CHECKED_IN");
+        if(updated){
+            RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "OCCUPIED");
+            System.out.println("Guest checked in successfully!");
+        
+        
+        }else{
+            System.out.println("Failed to check in guest.");
+        }
     }
 
     public static void checkOutMenu() {
@@ -666,14 +710,14 @@ public class HotelReservationSystem {
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
-        Guest guest = hotel.findGuestByEmail(email);
+        Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("Guest not found");
             return;
         }
 
-        ArrayList<Reservation> matches = hotel.findReservationsByGuest(guest);
+        ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
 
         if (matches.isEmpty()) {
             System.out.println("No reservations found");
@@ -695,7 +739,7 @@ public class HotelReservationSystem {
         int reservationId = scanner.nextInt();
         scanner.nextLine();
 
-        Reservation reservation = hotel.findReservationById(reservationId);
+        Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
         if (reservation == null) {
             System.out.println("Reservation ID does not exist");
@@ -707,7 +751,15 @@ public class HotelReservationSystem {
             return;
         }
 
-        hotel.checkOutGuest(reservationId);
+        boolean updated = ReservationDAO.updateReservationStatus(reservationId, "CHECKED_OUT");
+        if(updated){
+            RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "AVAILABLE");
+            System.out.println("Guest checked out successfully!");
+        
+        }else{
+            System.out.println("Failed to check out guest.");
+        
+        }
     }
 
     public static void reservationReceipt(Reservation reservation, double payment, double change) {
@@ -728,6 +780,18 @@ public class HotelReservationSystem {
         System.out.println("Change: PHP " + change);
         System.out.println("Status: " + reservation.getStatus());
         System.out.println("=========================================");
+
+    }
+
+    public static void viewAvailableRoomsFromDatabase() {
+        ArrayList<Room> rooms = RoomDAO.findAllRooms();
+        for (Room room : rooms) {
+            if (room.isAvailable()) {
+                System.out.println(room);
+
+            }
+
+        }
 
     }
 

@@ -15,11 +15,15 @@ import java.time.temporal.ChronoUnit;
 public class HotelReservationSystem {
 
     static Scanner scanner = new Scanner(System.in);
-    static int nextGuestId = 1;
 
     public static void main(String[] args) {
+        System.out.println("THIS IS SCREEN 1");
+    System.out.println("THIS TEXT SHOULD DISAPPEAR");
 
-     
+    System.out.println("\nPress Enter to clear the screen...");
+    scanner.nextLine();
+        clearScreen();
+        System.out.println("THIS IS SCREEN 2");
 
         boolean running = true;
 
@@ -79,17 +83,7 @@ public class HotelReservationSystem {
         System.out.println("7. Check Out");
         System.out.println("8. Exit");
 
-        System.out.print("Enter choice (1-8 only): ");
-
-        if (scanner.hasNextInt()) {
-            int choice = scanner.nextInt();
-            scanner.nextLine();
-            return choice;
-        } else {
-            System.out.println("Invalid input! Enter a number only!");
-            scanner.next();
-            return 0;
-        }
+        return readInt("Enter choice(1-8 only): ");
     }
 
     public static void createReservationMenu() {
@@ -104,14 +98,7 @@ public class HotelReservationSystem {
                2. DELUXE - PHP2500/NIGHT
                3. PREMIUM - PHP3500/NIGHT
                4. SUITE - PHP4500/NIGHT""");
-            System.out.print("Enter choice(1-4): ");
-
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-            } else {
-                System.out.println("Invalid input. Enter a number only!");
-                scanner.next();
-            }
+            choice = readInt("Enter choice(1-4 only): ");
 
             switch (choice) {
                 case 1:
@@ -140,8 +127,6 @@ public class HotelReservationSystem {
 
         } while (!validType);
 
-        scanner.nextLine();
-
         ArrayList<Room> matches = RoomDAO.findRoomsByType(roomType);
 
         Room assignedRoom = null;
@@ -158,7 +143,7 @@ public class HotelReservationSystem {
             return;
         }
 
-        int reservationId = ReservationDAO.getNextReservationId();
+      
 
         System.out.print("Enter your email: ");
         String email = scanner.nextLine();
@@ -168,7 +153,7 @@ public class HotelReservationSystem {
         if (guest == null) {
             System.out.println("No email found. Lets create one!");
 
-            int guestId = nextGuestId;
+            
 
             System.out.print("Enter your name: ");
             String name = scanner.nextLine();
@@ -176,10 +161,16 @@ public class HotelReservationSystem {
             System.out.print("Enter your phone number: ");
             String phone = scanner.nextLine();
 
-            guest = new Guest(guestId, name, phone, email);
-            GuestDAO.saveGuest(guest);
+            guest = new Guest(0, name, phone, email);
+            int guestId = GuestDAO.saveGuest(guest);
 
-            nextGuestId++;
+            if (guestId == -1) {
+                System.out.println("Guest was not saved. Try again.");
+                return;
+
+            }
+            guest = new Guest(guestId, name, phone, email);
+
         }
 
         LocalDate checkIn = null;
@@ -230,67 +221,83 @@ public class HotelReservationSystem {
 
         do {
 
-            System.out.print("Enter payment: PHP ");
+            payment = readDouble("Enter payment: PHP ");
 
-            if (scanner.hasNextDouble()) {
-                payment = scanner.nextDouble();
-                scanner.nextLine();
+            if (payment <= 0) {
 
-                if (payment <= 0) {
-                    System.out.println("Invalid payment! Payment must be greater than 0.");
+                System.out.println(
+                        "Invalid payment! Payment must be greater than 0."
+                );
 
-                } else if (payment >= totalPrice) {
-                    double change = payment - totalPrice;
+            } else if (payment >= totalPrice) {
 
-                    boolean saved = ReservationDAO.saveReservation(
-                            reservationId,
-                            guest.getGuestId(),
+                double change = payment - totalPrice;
+
+                int reservationId = ReservationDAO.saveReservation(
+                        guest.getGuestId(),
+                        assignedRoom.getRoomNumber(),
+                        totalPrice,
+                        payment,
+                        checkIn,
+                        checkOut,
+                        "CONFIRMED"
+                );
+
+                if (reservationId > 0) {
+
+                    boolean roomUpdated = RoomDAO.updateRoomStatus(
                             assignedRoom.getRoomNumber(),
-                            totalPrice, payment, checkIn, checkOut, "CONFIRMED"
+                            "RESERVED"
                     );
-                    if (saved) {
-                        RoomDAO.updateRoomStatus(
-                                assignedRoom.getRoomNumber(),
-                                "RESERVED"
+                    if (roomUpdated) {
+
+                        Reservation reservation
+                                = ReservationDAO.findReservationById(reservationId);
+
+                        reservationReceipt(
+                                reservation,
+                                payment,
+                                change
                         );
 
-                        Reservation reservation = ReservationDAO.findReservationById(reservationId);
-
-                        reservationReceipt(reservation, payment, change);
-
                         validPayment = true;
+
                     } else {
-                        System.out.println("Reservation was not saved. Please try again!");
+                        System.out.println(
+                                "Room status could not be updated. Reservation was cancelled.");
+                        ReservationDAO.cancelReservation(reservationId);
                         return;
 
                     }
-
                 } else {
-                    System.out.println("Insufficient payment. Please enter enough payment");
+
+                    System.out.println(
+                            "Reservation was not saved. Please try again!"
+                    );
+                    return;
                 }
 
             } else {
-                System.out.println("Invalid payment. Enter a number only");
-                scanner.next();
-            }
-        } while (!validPayment);
 
+                System.out.println(
+                        "Insufficient payment. Please enter enough payment"
+                );
+            }
+
+        } while (!validPayment);
     }
 
     public static void searchRoomByNumber() {
-        int roomNumber = 0;
-        System.out.print("Enter room number: ");
-        if (scanner.hasNextInt()) {
-            roomNumber = scanner.nextInt();
-            Room room = RoomDAO.findRoomByNumber(roomNumber);
-            if (room == null) {
-                System.out.println("Room not found!");
-            } else {
-                System.out.println(room);
-            }
+        int roomNumber = readInt("Enter room number: ");
+
+        Room room = RoomDAO.findRoomByNumber(roomNumber);
+
+        if (room == null) {
+            System.out.println("Room not found!");
+
         } else {
-            System.out.println("Enter a number only");
-            scanner.next();
+            System.out.println(room);
+
         }
     }
 
@@ -302,13 +309,7 @@ public class HotelReservationSystem {
         do {
             System.out.println("Choose Room Type");
             System.out.println("1. SINGLE\n2. DELUXE\n3. PREMIUM\n4. SUITE");
-            System.out.println("Enter choice(1-4 only): ");
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-            } else {
-                System.out.println("Enter a number only!");
-                scanner.next();
-            }
+            choice = readInt("Enter choice (1-4 only): ");
 
             switch (choice) {
                 case 1:
@@ -355,14 +356,7 @@ public class HotelReservationSystem {
                                2. Update my reservation
                                3. Cancel my reservation
                                4. Back""");
-            System.out.print("Enter choice(1-4 only): ");
-            if (scanner.hasNextInt()) {
-                choice = scanner.nextInt();
-                scanner.nextLine();
-            } else {
-                System.out.println("Invalid input! Only put a number");
-                scanner.next();
-            }
+            choice = readInt("Enter choice (1-4 only): ");
 
             switch (choice) {
                 case 1:
@@ -432,16 +426,7 @@ public class HotelReservationSystem {
             System.out.println(r);
         }
 
-        System.out.print("Enter reservation ID to update: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Invalid input! Put a number only!");
-            scanner.next();
-            return;
-        }
-
-        reservationId = scanner.nextInt();
-        scanner.nextLine();
+        reservationId = readInt("Enter reservation ID to update: ");
 
         Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
@@ -454,16 +439,34 @@ public class HotelReservationSystem {
             System.out.println("This reservation doesnt belong to you");
             return;
         }
+        if (reservation.getStatus() == ReservationStatus.CHECKED_OUT) {
+            System.out.println("Cannot update. Reservation has already been checked out.");
+            return;
+        }
 
-        System.out.print("Enter new check-in: ");
-        String inputCheckIn = scanner.nextLine();
-
-        System.out.print("Enter new check-out: ");
-        String inputCheckOut = scanner.nextLine();
+        LocalDate newCheckIn;
+        LocalDate newCheckOut;
 
         try {
-            LocalDate newCheckIn = LocalDate.parse(inputCheckIn);
-            LocalDate newCheckOut = LocalDate.parse(inputCheckOut);
+
+            if (reservation.getStatus() == ReservationStatus.CHECKED_IN) {
+                newCheckIn = reservation.getCheckIn();
+
+                System.out.println("Current check-in date: " + newCheckIn);
+                System.out.print("Enter new check out (yyyy-MM-dd): ");
+                String inputCheckOut = scanner.nextLine();
+
+                newCheckOut = LocalDate.parse(inputCheckOut);
+
+            } else {
+                System.out.print("Enter new check in (yyyy-MM-dd): ");
+                String inputCheckIn = scanner.nextLine();
+                System.out.print("Enter new check out (yyyy-MM-dd): ");
+                String inputCheckOut = scanner.nextLine();
+
+                newCheckIn = LocalDate.parse(inputCheckIn);
+                newCheckOut = LocalDate.parse(inputCheckOut);
+            }
 
             if (!newCheckIn.isBefore(newCheckOut)) {
                 System.out.println("Invalid date! Check-out must be after check-in.");
@@ -492,101 +495,134 @@ public class HotelReservationSystem {
         }
     }
 
-    public static void handlePaymentAdjustment(Reservation reservation,
-            LocalDate newCheckIn, LocalDate newCheckOut, double newTotalPrice) {
+    public static void handlePaymentAdjustment(
+            Reservation reservation,
+            LocalDate newCheckIn,
+            LocalDate newCheckOut,
+            double newTotalPrice) {
 
         double paymentDifference = newTotalPrice - reservation.getPayment();
 
         if (paymentDifference > 0) {
 
-            System.out.println("Additional payment required: PHP " + paymentDifference);
-            System.out.print("Enter additional payment: PHP ");
+            System.out.println(
+                    "Additional payment required: PHP " + paymentDifference
+            );
 
-            if (scanner.hasNextDouble()) {
-                double payment = scanner.nextDouble();
-                scanner.nextLine();
+            double payment = readDouble(
+                    "Enter additional payment: PHP "
+            );
 
-                if (payment >= paymentDifference) {
-                    double change = payment - paymentDifference;
+            if (payment >= paymentDifference) {
 
-                    double newPayment = reservation.getPayment() + paymentDifference;
+                double change = payment - paymentDifference;
 
-                    boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
-                            newCheckIn, newCheckOut,
-                            newTotalPrice, newPayment);
-                    
-                    if (updated) {
+                double newPayment
+                        = reservation.getPayment() + paymentDifference;
 
-                        System.out.println("Additional payment accepted");
-                        System.out.println("Change: PHP " + change);
+                boolean updated = ReservationDAO.updateReservation(
+                        reservation.getReservationId(),
+                        newCheckIn,
+                        newCheckOut,
+                        newTotalPrice,
+                        newPayment
+                );
 
-                        reservation.updateDates(newCheckIn, newCheckOut);
-                        reservation.updateTotalPrice();
-                        reservation.setPayment(newPayment);
+                if (updated) {
 
-                        System.out.println("Reservation updated successfully!");
-                        System.out.println(reservation);
-                    } else {
-                        System.out.println("Failed to update reservation in database");
+                    System.out.println("Additional payment accepted");
+                    System.out.println("Change: PHP " + change);
 
-                    }
+                    reservation.updateDates(newCheckIn, newCheckOut);
+                    reservation.updateTotalPrice();
+                    reservation.setPayment(newPayment);
+
+                    System.out.println("Reservation updated successfully!");
+                    System.out.println(reservation);
 
                 } else {
-                    System.out.println("Insufficient additional payment");
+
+                    System.out.println(
+                            "Failed to update reservation in database"
+                    );
                 }
 
             } else {
-                System.out.println("Invalid payment. Enter a number only");
-                scanner.next();
+
+                System.out.println(
+                        "Insufficient additional payment"
+                );
             }
 
         } else if (paymentDifference == 0) {
 
-            System.out.println("No additional payment required");
-            boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
-                    newCheckIn, 
+            System.out.println(
+                    "No additional payment required"
+            );
+
+            boolean updated = ReservationDAO.updateReservation(
+                    reservation.getReservationId(),
+                    newCheckIn,
                     newCheckOut,
-                    newTotalPrice, 
-                    reservation.getPayment());
-            if(updated){
+                    newTotalPrice,
+                    reservation.getPayment()
+            );
 
-            reservation.updateDates(newCheckIn, newCheckOut);
-            reservation.updateTotalPrice();
+            if (updated) {
 
-            System.out.println("Reservation updated successfully!");
-            System.out.println(reservation);
-            }else{
-                System.out.println("Failed to update reservation in database");
-            
-            
+                reservation.updateDates(newCheckIn, newCheckOut);
+                reservation.updateTotalPrice();
+
+                System.out.println(
+                        "Reservation updated successfully!"
+                );
+                System.out.println(reservation);
+
+            } else {
+
+                System.out.println(
+                        "Failed to update reservation in database"
+                );
             }
 
         } else {
 
-            double refund = reservation.getPayment() - newTotalPrice;
+            double refund
+                    = reservation.getPayment() - newTotalPrice;
+
             double newPayment = newTotalPrice;
 
-            System.out.println("Reservation total decreased.");
-            System.out.println("Refund amount: PHP " + refund);
-            
-             boolean updated = ReservationDAO.updateReservation(reservation.getReservationId(), 
-                    newCheckIn, 
+            System.out.println(
+                    "Reservation total decreased."
+            );
+            System.out.println(
+                    "Refund amount: PHP " + refund
+            );
+
+            boolean updated = ReservationDAO.updateReservation(
+                    reservation.getReservationId(),
+                    newCheckIn,
                     newCheckOut,
-                    newTotalPrice, 
-                    newPayment);
-            if(updated){
+                    newTotalPrice,
+                    newPayment
+            );
 
-            reservation.updateDates(newCheckIn, newCheckOut);
-            reservation.updateTotalPrice();
-            reservation.setPayment(newPayment);
+            if (updated) {
 
-            System.out.println("Reservation updated successfully!");
-            System.out.println(reservation);
-            
-            }else{
-                System.out.println("Failed to update reservation in database");
-            
-            
+                reservation.updateDates(newCheckIn, newCheckOut);
+                reservation.updateTotalPrice();
+                reservation.setPayment(newPayment);
+
+                System.out.println(
+                        "Reservation updated successfully!"
+                );
+                System.out.println(reservation);
+
+            } else {
+
+                System.out.println(
+                        "Failed to update reservation in database"
+                );
             }
         }
     }
@@ -594,57 +630,70 @@ public class HotelReservationSystem {
     public static void cancelReservation() {
         int reservationId;
 
-        System.out.println("Enter your email: ");
+        System.out.print("Enter your email: ");
         String email = scanner.nextLine();
 
         Guest guest = GuestDAO.findGuestByEmail(email);
 
         if (guest == null) {
             System.out.println("Guest not found");
+            return;
+        }
+
+        ArrayList<Reservation> matches
+                = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
+
+        if (matches.isEmpty()) {
+            System.out.println("No reservation found");
+            return;
+        }
+
+        for (Reservation r : matches) {
+            System.out.println(r);
+        }
+
+        reservationId = readInt("Enter reservation ID to cancel: ");
+
+        Reservation reservation
+                = ReservationDAO.findReservationById(reservationId);
+
+        if (reservation == null) {
+            System.out.println("Reservation ID does not exist");
+            return;
+        }
+
+        if (reservation.getGuest().getGuestId() != guest.getGuestId()) {
+            System.out.println("This reservation does not belong to you");
+            return;
+        }
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            System.out.println(
+                    "Cannot cancel. Reservation status is: "
+                    + reservation.getStatus());
+            return;
+
+        }
+
+        boolean cancelled = ReservationDAO.cancelReservation(reservationId);
+
+        if (cancelled) {
+            boolean roomUpdated = RoomDAO.updateRoomStatus(
+                    reservation.getRoom().getRoomNumber(),
+                    "AVAILABLE"
+            );
+               if(roomUpdated){
+                   System.out.println("Reservation cancelled successfully!");
+               
+               }else{
+                   System.out.println("Reservation was cancelled but the room status could not be updated.");
+               
+               
+               }
+
+            
+
         } else {
-            ArrayList<Reservation> matches = ReservationDAO.findReservationsByGuestId(guest.getGuestId());
-
-            if (matches.isEmpty()) {
-                System.out.println("No reservation found");
-            } else {
-                for (Reservation r : matches) {
-                    System.out.println(r);
-                }
-
-                System.out.print("Enter reservation ID to cancel: ");
-
-                if (scanner.hasNextInt()) {
-                    reservationId = scanner.nextInt();
-                    scanner.nextLine();
-
-                    Reservation reservation = ReservationDAO.findReservationById(reservationId);
-
-                    if (reservation == null) {
-                        System.out.println("Reservation ID does not exist");
-                    } else {
-                        if (reservation.getGuest().getGuestId() == guest.getGuestId()) {
-
-                           boolean cancelled = ReservationDAO.cancelReservation(reservationId);
-                           if(cancelled){
-                               RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "AVAILABLE");
-                               System.out.println("Reservation cancelled succesfully!");
-                           
-                           }else{
-                               System.out.println("Failed to cancel reservation");
-                           
-                           }
-
-                        } else {
-                            System.out.println("This reservation does not belong to you");
-                        }
-
-                    }
-
-                } else {
-                    System.out.println("Invalid input! Put a number only!");
-                    scanner.next();
-                }
-            }
+            System.out.println("Failed to cancel reservation");
         }
     }
 
@@ -671,16 +720,7 @@ public class HotelReservationSystem {
             System.out.println(r);
         }
 
-        System.out.print("Enter reservation ID to check in: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Invalid input! Put a number only!");
-            scanner.next();
-            return;
-        }
-
-        int reservationId = scanner.nextInt();
-        scanner.nextLine();
+        int reservationId = readInt("Enter reservation ID to check in: ");
 
         Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
@@ -693,14 +733,30 @@ public class HotelReservationSystem {
             System.out.println("This reservation does not belong to you");
             return;
         }
+        if (reservation.getStatus() != ReservationStatus.CONFIRMED) {
+            System.out.println(
+                    "Cannot check in. Reservation status is: "
+                    + reservation.getStatus());
+            return;
+
+        }
 
         boolean updated = ReservationDAO.updateReservationStatus(reservationId, "CHECKED_IN");
-        if(updated){
-            RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "OCCUPIED");
-            System.out.println("Guest checked in successfully!");
-        
-        
-        }else{
+
+        if (updated) {
+            boolean roomUpdated = RoomDAO.updateRoomStatus(
+                    reservation.getRoom().getRoomNumber(), "OCCUPIED");
+            if (roomUpdated) {
+                System.out.println("Guest checked in successfully!");
+
+            } else {
+                System.out.println(
+                        "Room status could not be updated. Check in was cancelled.");
+                ReservationDAO.updateReservationStatus(reservationId, "CONFIRMED");
+
+            }
+
+        } else {
             System.out.println("Failed to check in guest.");
         }
     }
@@ -728,16 +784,7 @@ public class HotelReservationSystem {
             System.out.println(r);
         }
 
-        System.out.print("Enter reservation ID to check out: ");
-
-        if (!scanner.hasNextInt()) {
-            System.out.println("Invalid input! Put a number only!");
-            scanner.next();
-            return;
-        }
-
-        int reservationId = scanner.nextInt();
-        scanner.nextLine();
+        int reservationId = readInt("Enter reservation ID to check out: ");
 
         Reservation reservation = ReservationDAO.findReservationById(reservationId);
 
@@ -750,15 +797,34 @@ public class HotelReservationSystem {
             System.out.println("This reservation does not belong to you");
             return;
         }
+        if (reservation.getStatus() != ReservationStatus.CHECKED_IN) {
+            System.out.println(
+                    "Cannot check out. Reservation status is: "
+                    + reservation.getStatus());
+            return;
+
+        }
 
         boolean updated = ReservationDAO.updateReservationStatus(reservationId, "CHECKED_OUT");
-        if(updated){
-            RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "AVAILABLE");
-            System.out.println("Guest checked out successfully!");
+        if (updated) {
+            boolean roomUpdated = RoomDAO.updateRoomStatus(reservation.getRoom().getRoomNumber(), "AVAILABLE");
+            
+            if(roomUpdated){
+               System.out.println("Guest checked out successfully!");
+            
+            
+            }else{
+                System.out.println(
+                        "Room status could not be updated. Check out was cancelled");
+                ReservationDAO.updateReservationStatus(reservationId, "CHECKED_IN");
+            
+            
+            }
         
-        }else{
+
+        } else {
             System.out.println("Failed to check out guest.");
-        
+
         }
     }
 
@@ -794,5 +860,46 @@ public class HotelReservationSystem {
         }
 
     }
+
+    public static int readInt(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            if (scanner.hasNextInt()) {
+                int value = scanner.nextInt();
+                scanner.nextLine();
+                return value;
+
+            } else {
+                System.out.println("Invalid input! Enter a number only.");
+                scanner.next();
+
+            }
+
+        }
+
+    }
+
+    public static double readDouble(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            if (scanner.hasNextDouble()) {
+                double value = scanner.nextDouble();
+                scanner.nextLine();
+                return value;
+
+            } else {
+                System.out.println("Invalid input! Enter a number only.");
+                scanner.next();
+
+            }
+
+        }
+
+    }
+ public static void clearScreen() {
+    System.out.print("\033[2J");
+    System.out.print("\033[H");
+    System.out.flush();
+}
 
 }

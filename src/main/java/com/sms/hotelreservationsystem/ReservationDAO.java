@@ -10,6 +10,7 @@ package com.sms.hotelreservationsystem;
  */
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -17,58 +18,50 @@ import java.util.ArrayList;
 
 public class ReservationDAO {
 
-    public static boolean saveReservation(int reservationId,
-            int guestId, int roomNumber, double totalPrice,
-            double payment, LocalDate checkIn, LocalDate checkOut,
-            String status) {
+   public static int saveReservation(
+        int guestId,
+        int roomNumber,
+        double totalPrice,
+        double payment,
+        LocalDate checkIn,
+        LocalDate checkOut,
+        String status) {
 
-        String sql = "INSERT INTO reservations "
-                + "(reservation_id, guest_id, room_number, check_in_date, check_out_date, total_price, payment, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String sql = "INSERT INTO reservations "
+            + "(guest_id, room_number, check_in_date, check_out_date, total_price, payment, status) "
+            + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
+    try (Connection connection = DatabaseConnection.getConnection();
+            PreparedStatement stmt = connection.prepareStatement(
+                    sql,
+                    Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, reservationId);
-            stmt.setInt(2, guestId);
-            stmt.setInt(3, roomNumber);
-            stmt.setDate(4, java.sql.Date.valueOf(checkIn));
-            stmt.setDate(5, java.sql.Date.valueOf(checkOut));
-            stmt.setDouble(6, totalPrice);
-            stmt.setDouble(7, payment);
-            stmt.setString(8, status);
+        stmt.setInt(1, guestId);
+        stmt.setInt(2, roomNumber);
+        stmt.setDate(3, java.sql.Date.valueOf(checkIn));
+        stmt.setDate(4, java.sql.Date.valueOf(checkOut));
+        stmt.setDouble(5, totalPrice);
+        stmt.setDouble(6, payment);
+        stmt.setString(7, status);
 
-            stmt.executeUpdate();
-            return true;
+        int rowsInserted = stmt.executeUpdate();
 
-        } catch (SQLException e) {
-            System.out.println("Failed to save reservation");
-            e.printStackTrace();
-            return false;
-        }
-    }
-    public static int getNextReservationId(){
-        String sql = "SELECT COALESCE(MAX(reservation_id), 0) + 1 AS next_id FROM reservations";
-        
-        try(Connection connection = DatabaseConnection.getConnection();
-                PreparedStatement stmt = connection.prepareStatement(sql)){
-            ResultSet result = stmt.executeQuery();
-            if(result.next()){
-                return result.getInt("next_id");
-                
-            
-            
+        if (rowsInserted > 0) {
+
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+
+            if (generatedKeys.next()) {
+                return generatedKeys.getInt(1);
             }
-        
-        }catch(SQLException e){
-            System.out.println("Failed to get next reservation ID");
-            e.printStackTrace();
-        
-        
         }
-        return 1;
-    
-    
+
+    } catch (SQLException e) {
+        System.out.println("Failed to save reservation");
+        e.printStackTrace();
     }
+
+    return -1;
+}
 
     public static Reservation findReservationById(int reservationId) {
         String sql = "SELECT * FROM reservations WHERE reservation_id = ?";

@@ -10,25 +10,43 @@ package com.sms.hotelreservationsystem;
  */
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class GuestDAO {
 
-    public static void saveGuest(Guest guest) {
-        String sql = "INSERT INTO guests (guest_id, name, email, phone) VALUES (?, ?, ?, ?)";
-        try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setInt(1, guest.getGuestId());
-            stmt.setString(2, guest.getName());
-            stmt.setString(3, guest.getEmail());
-            stmt.setString(4, guest.getPhone());
-            stmt.executeUpdate();
+    public static int saveGuest(Guest guest) {
+        String sql = "INSERT INTO guests (name, email, phone) VALUES (?, ?, ?)";
+        
+        try (Connection connection = DatabaseConnection.getConnection(); 
+                PreparedStatement stmt = connection.prepareStatement(
+                        sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            
+            stmt.setString(1, guest.getName());
+            stmt.setString(2, guest.getEmail());
+            stmt.setString(3, guest.getPhone());
+            int rowsInserted = stmt.executeUpdate();
+            
+            if(rowsInserted > 0){
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                
+                if(generatedKeys.next()){
+                    return generatedKeys.getInt(1);
+                
+                }
+            
+            
+            }
 
         } catch (SQLException e) {
             System.out.println("Failed to save guest");
             e.printStackTrace();
+            
 
         }
+        return -1;
 
     }
 
@@ -86,5 +104,5 @@ public class GuestDAO {
 
     return null;
 }
-
+   
 }

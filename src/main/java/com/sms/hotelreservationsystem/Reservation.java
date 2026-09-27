@@ -92,7 +92,7 @@ public class Reservation {
         if (totalPrice > 0) {
             this.totalPrice = totalPrice;
         } else {
-            System.out.println("Total price cannot be negative");
+            System.out.println("Total price must be greater than zero.");
         }
     }
 

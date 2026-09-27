@@ -124,19 +124,24 @@ public class RoomDAO {
         return rooms;
 
     }
-    public static void updateRoomStatus(int roomNumber, String status){
+    public static boolean updateRoomStatus(int roomNumber, String status){
         String sql = "UPDATE rooms SET status = ? WHERE room_number = ?";
         
         try(Connection connection = DatabaseConnection.getConnection();
                 PreparedStatement stmt = connection.prepareStatement(sql)){
+            
             stmt.setString(1, status);
             stmt.setInt(2, roomNumber);
-            stmt.executeUpdate();
+            
+            int rowsUpdated = stmt.executeUpdate();
+            
+            return rowsUpdated > 0;
         
         
         }catch(SQLException e){
             System.out.println("Failed to update room status!");
             e.printStackTrace();
+            return false;
         
         
         }

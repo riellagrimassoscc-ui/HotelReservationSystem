@@ -135,13 +135,18 @@ public class Reservation {
 
     @Override
     public String toString() {
-        return "Reservation ID: " + reservationId + "\n"
-                + "Guest: " + guest.getName() + "\n"
-                + "Room: " + room.getRoomNumber() + " (" + room.getRoomType() + ")" + "\n"
-                + "Check-in: " + checkIn + "\n"
-                + "Check-out: " + checkOut + "\n"
-                + "Total Price: " + totalPrice + "\n"
-                + "Payment: " + payment + "\n"
-                + "Status: " + status + "\n";
+        return "========== RESERVATION DETAILS ==========\n\n" 
+                + String.format("%-15s: %d%n", "Reservation ID", reservationId) 
+                + String.format("%-15s: %s%n", "Guest", guest.getName()) 
+                + String.format("%-15s: %d%n", "Room", room.getRoomNumber()) 
+                + String.format("%-15s: %s%n", "Room Type", room.getRoomType()) 
+                + String.format("%-15s: %s%n", "Check-in", checkIn) 
+                + String.format("%-15s: %s%n", "Check-out", checkOut) 
+                + String.format("%-15s: %d%n", "Nights", getNumberOfNights()) 
+                + String.format("%-15s: PHP %,.2f%n", "Price/Night", room.getPricePerNight()) 
+                + String.format("%-15s: PHP %,.2f%n", "Total Price", totalPrice) 
+                + String.format("%-15s: PHP %,.2f%n", "Payment", payment) 
+                + String.format("%-15s: %s%n", "Status", status) 
+                + "\n==========================================";
     }
 }

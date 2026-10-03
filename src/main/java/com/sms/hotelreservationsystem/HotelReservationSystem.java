@@ -54,7 +54,7 @@ public class HotelReservationSystem {
 
                 case 8:
                     running = false;
-                    System.out.println("Thank you for using the reservation system");
+                    System.out.println("THANK YOU FOR COMING!");
                     break;
 
                 default:
@@ -77,7 +77,7 @@ public class HotelReservationSystem {
         System.out.println("6. Check In");
         System.out.println("7. Check Out");
         System.out.println("8. Exit");
-        System.out.println( "\n===============================================" );
+        System.out.println("\n===============================================");
 
         return readInt("Enter choice(1-8 only): ");
     }
@@ -196,19 +196,74 @@ public class HotelReservationSystem {
 
         long nights = ChronoUnit.DAYS.between(checkIn, checkOut);
         double totalPrice = nights * assignedRoom.getPricePerNight();
+        
+        clearScreen();
 
-        System.out.println("\n========== RESERVATION SUMMARY ==========");
-        System.out.println("Guest: " + guest.getName());
-        System.out.println("Email: " + guest.getEmail());
-        System.out.println("Phone: " + guest.getPhone());
-        System.out.println("Room Number: " + assignedRoom.getRoomNumber());
-        System.out.println("Room Type: " + assignedRoom.getRoomType());
-        System.out.println("Price Per Night: PHP " + assignedRoom.getPricePerNight());
-        System.out.println("Check-in: " + checkIn);
-        System.out.println("Check-out: " + checkOut);
-        System.out.println("Number of Nights: " + nights);
-        System.out.println("Total Price: PHP " + totalPrice);
-        System.out.println("==========================================");
+        System.out.println("\n========== RESERVATION SUMMARY ==========\n");
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Guest",
+                guest.getName()
+        );
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Email",
+                guest.getEmail()
+        );
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Phone",
+                guest.getPhone()
+        );
+
+        System.out.printf(
+                "%-18s: %d%n",
+                "Room Number",
+                assignedRoom.getRoomNumber()
+        );
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Room Type",
+                assignedRoom.getRoomType()
+        );
+
+        System.out.printf(
+                "%-18s: PHP %,.2f%n",
+                "Price Per Night",
+                assignedRoom.getPricePerNight()
+        );
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Check-in",
+                checkIn
+        );
+
+        System.out.printf(
+                "%-18s: %s%n",
+                "Check-out",
+                checkOut
+        );
+
+        System.out.printf(
+                "%-18s: %d%n",
+                "Number of Nights",
+                nights
+        );
+
+        System.out.printf(
+                "%-18s: PHP %,.2f%n",
+                "Total Price",
+                totalPrice
+        );
+
+        System.out.println(
+                "\n=========================================="
+        );
 
         double payment;
         boolean validPayment = false;
@@ -294,7 +349,7 @@ public class HotelReservationSystem {
         if (room == null) {
             System.out.println("Room not found!");
         } else {
-            System.out.println("===== ROOM INFORMATION =====\n");
+            System.out.println("========== ROOM INFORMATION ==========\n");
 
             System.out.printf(
                     "%-12s %-12s %-15s %-12s%n",
@@ -370,8 +425,9 @@ public class HotelReservationSystem {
         if (matches.isEmpty()) {
             System.out.println("No rooms found");
         } else {
-            System.out.println("===== " + roomType + " ROOMS =====\n");
-
+            System.out.println(
+        "========== " + roomType + " ROOMS ==========\n");
+            
             System.out.printf(
                     "%-12s %-12s %-15s %-12s%n",
                     "Room No.",
@@ -409,7 +465,7 @@ public class HotelReservationSystem {
                                2. Update my reservation
                                3. Cancel my reservation
                                4. Back""");
-            System.out.println( "\n=============================================");
+            System.out.println("\n=============================================");
             choice = readInt("Enter choice (1-4 only): ");
 
             switch (choice) {
@@ -451,7 +507,7 @@ public class HotelReservationSystem {
         }
         clearScreen();
         System.out.println("========== MY RESERVATIONS ==========\n");
-        System.out.printf("%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n", 
+        System.out.printf("%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
                 "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status");
         System.out.println("--------------------------------------------------------------------------------");
         for (Reservation r : matches) {
@@ -460,7 +516,7 @@ public class HotelReservationSystem {
                     r.getRoom().getRoomNumber(),
                     r.getRoom().getRoomType(),
                     r.getCheckIn(),
-                    r.getCheckOut(), 
+                    r.getCheckOut(),
                     r.getTotalPrice(),
                     r.getStatus());
         }
@@ -489,28 +545,27 @@ public class HotelReservationSystem {
             pauseScreen();
             return;
         }
-        
+
         clearScreen();
-        
+
         System.out.println("========== MY RESERVATIONS ==========\n");
-        System.out.printf( "%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
-                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status" );
-        
-        System.out.println( "--------------------------------------------------------------------------------" );
-        
+        System.out.printf("%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
+                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status");
+
+        System.out.println("--------------------------------------------------------------------------------");
 
         for (Reservation r : matches) {
-           System.out.printf( "%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n", 
-                   r.getReservationId(), 
-                   r.getRoom().getRoomNumber(), 
-                   r.getRoom().getRoomType(), 
-                   r.getCheckIn(), 
-                   r.getCheckOut(), 
-                   r.getTotalPrice(), 
-                   r.getStatus() );
+            System.out.printf("%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n",
+                    r.getReservationId(),
+                    r.getRoom().getRoomNumber(),
+                    r.getRoom().getRoomType(),
+                    r.getCheckIn(),
+                    r.getCheckOut(),
+                    r.getTotalPrice(),
+                    r.getStatus());
         }
         System.out.println(
-                "\n================================================================================" );
+                "\n================================================================================");
 
         reservationId = readInt("Enter reservation ID to update: ");
 
@@ -751,32 +806,30 @@ public class HotelReservationSystem {
             pauseScreen();
             return;
         }
-        
+
         clearScreen();
-        
+
         System.out.println("========== MY RESERVATIONS ==========\n");
-        
-        System.out.printf( "%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
-                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status" );
-        
-        System.out.println( 
-                "--------------------------------------------------------------------------------" );
-        
-        
+
+        System.out.printf("%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
+                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status");
+
+        System.out.println(
+                "--------------------------------------------------------------------------------");
 
         for (Reservation r : matches) {
-            System.out.printf( "%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n",
+            System.out.printf("%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n",
                     r.getReservationId(),
                     r.getRoom().getRoomNumber(),
                     r.getRoom().getRoomType(),
                     r.getCheckIn(),
                     r.getCheckOut(),
                     r.getTotalPrice(),
-                    r.getStatus() );
+                    r.getStatus());
         }
-        
-        System.out.println( 
-                "\n================================================================================" );
+
+        System.out.println(
+                "\n================================================================================");
 
         reservationId = readInt("Enter reservation ID to cancel: ");
 
@@ -845,9 +898,22 @@ public class HotelReservationSystem {
             pauseScreen();
             return;
         }
+        
+        clearScreen();
+        System.out.println("========== MY RESERVATIONS ==========\n");
+        System.out.printf( "%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
+                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status" );
+        System.out.println( "--------------------------------------------------------------------------------" );
 
         for (Reservation r : matches) {
-            System.out.println(r);
+            System.out.printf( "%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n",
+                    r.getReservationId(),
+                    r.getRoom().getRoomNumber(),
+                    r.getRoom().getRoomType(), 
+                    r.getCheckIn(),
+                    r.getCheckOut(),
+                    r.getTotalPrice(),
+                    r.getStatus() );
         }
 
         int reservationId = readInt("Enter reservation ID to check in: ");
@@ -917,10 +983,25 @@ public class HotelReservationSystem {
             pauseScreen();
             return;
         }
+        
+        clearScreen();
+        
+        System.out.println("========== MY RESERVATIONS ==========\n");
+        System.out.printf( "%-5s %-8s %-12s %-15s %-15s %-18s %-15s%n",
+                "ID", "Room", "Type", "Check-in", "Check-out", "Total Price", "Status" );
+        System.out.println( "--------------------------------------------------------------------------------" );
 
         for (Reservation r : matches) {
-            System.out.println(r);
+            System.out.printf( "%-5d %-8d %-12s %-15s %-15s PHP %,-11.2f %-15s%n",
+                    r.getReservationId(),
+                    r.getRoom().getRoomNumber(),
+                    r.getRoom().getRoomType(),
+                    r.getCheckIn(),
+                    r.getCheckOut(),
+                    r.getTotalPrice(),
+                    r.getStatus() );
         }
+        System.out.println( "\n================================================================================" );
 
         int reservationId = readInt("Enter reservation ID to check out: ");
 
@@ -972,23 +1053,23 @@ public class HotelReservationSystem {
     public static void reservationReceipt(Reservation reservation, double payment, double change) {
         System.out.println();
         System.out.println("========== RESERVATION RECEIPT ==========\n");
-        System.out.printf( "%-18s: %d%n", "Reservation ID", reservation.getReservationId());
-        System.out.printf( "%-18s: %s%n", "Guest", reservation.getGuest().getName());
-        System.out.printf( "%-18s: %s%n", "Email", reservation.getGuest().getEmail());
-        System.out.printf( "%-18s: %s%n", "Phone", reservation.getGuest().getPhone());
+        System.out.printf("%-18s: %d%n", "Reservation ID", reservation.getReservationId());
+        System.out.printf("%-18s: %s%n", "Guest", reservation.getGuest().getName());
+        System.out.printf("%-18s: %s%n", "Email", reservation.getGuest().getEmail());
+        System.out.printf("%-18s: %s%n", "Phone", reservation.getGuest().getPhone());
         System.out.println();
-        System.out.printf( "%-18s: %d%n", "Room Number", reservation.getRoom().getRoomNumber());
-        System.out.printf( "%-18s: %s%n", "Room Type", reservation.getRoom().getRoomType());
-        System.out.printf( "%-18s: PHP %,.2f%n", "Price Per Night",
+        System.out.printf("%-18s: %d%n", "Room Number", reservation.getRoom().getRoomNumber());
+        System.out.printf("%-18s: %s%n", "Room Type", reservation.getRoom().getRoomType());
+        System.out.printf("%-18s: PHP %,.2f%n", "Price Per Night",
                 reservation.getRoom().getPricePerNight());
-        System.out.printf( "%-18s: %s%n", "Check-in", reservation.getCheckIn());
-        System.out.printf( "%-18s: %s%n", "Check-out", reservation.getCheckOut());
-        System.out.printf( "%-18s: %d%n", "Number of Nights", reservation.getNumberOfNights());
-        System.out.printf( "%-18s: PHP %,.2f%n", "Total Price", reservation.getTotalPrice());
-        System.out.printf( "%-18s: PHP %,.2f%n", "Payment", payment);
-        System.out.printf( "%-18s: PHP %,.2f%n", "Change", change);
-        System.out.printf( "%-18s: %s%n", "Status", reservation.getStatus());
-        System.out.println( "\n==========================================" );
+        System.out.printf("%-18s: %s%n", "Check-in", reservation.getCheckIn());
+        System.out.printf("%-18s: %s%n", "Check-out", reservation.getCheckOut());
+        System.out.printf("%-18s: %d%n", "Number of Nights", reservation.getNumberOfNights());
+        System.out.printf("%-18s: PHP %,.2f%n", "Total Price", reservation.getTotalPrice());
+        System.out.printf("%-18s: PHP %,.2f%n", "Payment", payment);
+        System.out.printf("%-18s: PHP %,.2f%n", "Change", change);
+        System.out.printf("%-18s: %s%n", "Status", reservation.getStatus());
+        System.out.println("\n==========================================");
 
     }
 
@@ -1018,7 +1099,7 @@ public class HotelReservationSystem {
         while (true) {
             clearScreen();
 
-            System.out.println("===== AVAILABLE ROOMS =====\n");
+            System.out.println("========== AVAILABLE ROOMS ==========\n");
 
             System.out.printf(
                     "%-12s %-12s %-15s %-12s%n",
